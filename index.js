@@ -1,16 +1,12 @@
 let mysql = require("mysql");
 let inquirer = require("inquirer");
+let express = require("express"); 
+let app = express(); 
 
 let connection = mysql.createConnection({
   host: "localhost",
-
-  // Your port; if not 3306
   port: 3306,
-
-  // Your username
   user: "root",
-
-  // Your password
   password: "",
   database: "employee_db"
 });
@@ -26,7 +22,7 @@ function start() {
     .prompt({
       name: "startSelection",
       type: "list",
-      message: "Would you like to create a department, a role, or an employee?",
+      message: "Would you like to create a department, a role, an employee, or are you finished?",
       choices: ["DEPARTMENT", "ROLE", "EMPLOYEE", "EXIT"]
     })
     .then(function (answer) {
@@ -39,7 +35,7 @@ function start() {
       else if (answer.startSelection === "EMPLOYEE") {
         createEmployee();
       } 
-      else {
+      else if (answer.startSelection === "EXIT") {
         connection.end();
       }
     });
@@ -56,9 +52,9 @@ function createDept() {
     ])  
         .then(function (answer) {
           connection.query(
-            "INSERT INTO createDept SET ?",
+            "INSERT INTO department SET ?",
             {
-              dept_name: answer.dept,
+              name: answer.dept,
             },
             function (err) {
               if (err) throw err;
@@ -102,11 +98,11 @@ function createRole() {
     ])  
         .then(function (answer) {
           connection.query(
-            "INSERT INTO createRole SET ?",
+            "INSERT INTO role SET ?",
             {
-              role_name: answer.role,
-              role_salary: answer.salary,
-              role_dept: answer.dept_id,
+              title: answer.role,
+              salary: answer.salary,
+              department_id: answer.dept_id,
 
             },
             function (err) {
@@ -132,9 +128,9 @@ function createEmployee() {
           message: "What is the employee's last name?",
         },
         {
-          name: "dept_id",
+          name: "role_id",
           type: "input",
-          message: "What is the ID for the department in which this employee works?",
+          message: "What is the ID for this employee's role?",
           validate: function(value) {
             if (isNaN(value) === false) {
               return true;
@@ -156,13 +152,12 @@ function createEmployee() {
       ])  
           .then(function (answer) {
             connection.query(
-              "INSERT INTO createEmployee SET ?",
+              "INSERT INTO employee SET ?",
               {
-                employee_firstName: answer.first_name,
-                employee_lastName: answer.last_name,
-                employee_dept_id: answer.dept_id,
-                employee_mgr_id: answer.mgr_id,
-              
+                first_name: answer.first_name,
+                last_name: answer.last_name,
+                role_id: answer.role_id,
+                manager_id: answer.mgr_id,
               },
               function (err) {
                 if (err) throw err;
