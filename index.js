@@ -1,7 +1,5 @@
 let mysql = require("mysql");
 let inquirer = require("inquirer");
-let express = require("express"); 
-let app = express(); 
 
 let connection = mysql.createConnection({
   host: "localhost",
@@ -38,12 +36,23 @@ function start() {
       else if (answer.startSelection === "EXIT") {
         connection.end();
       }
-    });
-}
+    })
+};
 
 function createDept() {
   inquirer
     .prompt([
+      {
+        name: "dept_id",
+        type: "input",
+        message: "What is this department's ID?",
+        validate: function(value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
+        }
+      },
       {
         name: "dept",
         type: "input",
@@ -54,20 +63,32 @@ function createDept() {
           connection.query(
             "INSERT INTO department SET ?",
             {
+              dept_id: answer.dept_id,
               name: answer.dept,
             },
             function (err) {
               if (err) throw err;
               console.log("Your department has been successfully added.");
-             
               start();
             }
           )
         })
 };
+
 function createRole() {
   inquirer
     .prompt([
+      {
+        name: "role_id",
+        type: "input",
+        message: "What is this role's ID?",
+        validate: function(value) {
+          if (isNaN(value) === false) {
+            return true;
+          }
+          return false;
+        }
+      },
       {
         name: "role",
         type: "input",
@@ -100,23 +121,36 @@ function createRole() {
           connection.query(
             "INSERT INTO role SET ?",
             {
+              role_id: answer.role_id,
               title: answer.role,
               salary: answer.salary,
-              department_id: answer.dept_id,
+              dept_id: answer.dept_id,
 
             },
             function (err) {
               if (err) throw err;
               console.log("Your role has been successfully added.");
-             
+
               start();
             }
           )
         })
 };
+
 function createEmployee() {
     inquirer
       .prompt([
+        {
+          name: "emp_id",
+          type: "input",
+          message: "What is the ID for this employee?",
+          validate: function(value) {
+            if (isNaN(value) === false) {
+              return true;
+            }
+            return false;
+          }
+        },
         {
           name: "first_name",
           type: "input",
@@ -148,21 +182,21 @@ function createEmployee() {
             }
             return false;
           }
-        },
+        }
       ])  
           .then(function (answer) {
             connection.query(
               "INSERT INTO employee SET ?",
               {
+                emp_id: answer.emp_id,
                 first_name: answer.first_name,
                 last_name: answer.last_name,
                 role_id: answer.role_id,
-                manager_id: answer.mgr_id,
+                mgr_id: answer.mgr_id,
               },
               function (err) {
                 if (err) throw err;
                 console.log("Your employee has been successfully added.");
-               
                 start();
               }
             )
